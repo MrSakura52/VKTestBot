@@ -1,4 +1,4 @@
-import uvicorn, random, vk
+import uvicorn, vk, grand
 
 from fastapi import FastAPI, Request, Response
 from pydantic import BaseSettings
@@ -17,21 +17,13 @@ vk_api = vk.API(vk_session)
 
 app = FastAPI()
 
-def get_random_id(): return random.randint(0, 500000000000000000000000000)
-
-def reply_to_message(message_text: str, vk_api, user_id: int):
-    reply_list = {"привет": 'vk_api.messages.send(user_id = user_id, message = "И тебе привет", random_id = get_random_id(), v=5.131)',
-        "как дела": '''vk_api.messages.send(user_id = user_id, message = "Хорошо", random_id = get_random_id(), v=5.131)
-vk_api.messages.send(user_id = user_id, message = "Как у тебя?", random_id = get_random_id(), v=5.131)'''}
-    if message_text in reply_list: exec(reply_list[message_text])
-
 @app.post("/main")
 async def authorize(req: Request):
     req_body = await req.json()
     if req_body['type'] == 'confirmation' and req_body['group_id'] == settings.group_id:
         return Response(content=settings.confirmation_string, media_type="application/json")
     elif req_body['type'] == 'message_new':
-        reply_to_message(
+        grand.reply_to_message(
             req_body['object']['message']['text'].lower(),
             vk_api, 
             req_body['object']['message']['from_id'])
